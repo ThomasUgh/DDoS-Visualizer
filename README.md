@@ -7,6 +7,8 @@ Eine interaktive HTML-Visualisierung, die zeigt wie DDoS-Angriffe funktionieren 
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 
+<a href="https://ibb.co/9kdMKYYx"><img src="https://i.ibb.co/Kp814yyt/Bildschirmfoto-2025-11-21-um-12-58-53.png" alt="Bildschirmfoto-2025-11-21-um-12-58-53" border="0"></a>
+
 ## 📋 Übersicht
 
 Diese interaktive Visualisierung zeigt anschaulich:
