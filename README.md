@@ -16,3 +16,10 @@ Diese interaktive Visualisierung zeigt anschaulich:
 - Die Architektur von Botnet-Infrastrukturen mit C2-Servern
 - Wie spezialisierte DDoS-Protection-Systeme arbeiten
 - Die Effektivität verschiedener Schutzmaßnahmen in Echtzeit
+
+## 🚀 Installation & Nutzung
+
+### Einfache Verwendung
+1. Repository klonen oder `ddos-visualisierung-full.html` herunterladen
+2. Die HTML-Datei in einem modernen Browser öffnen
+3. Keine weiteren Dependencies oder Installation nötig!
