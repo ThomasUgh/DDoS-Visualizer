@@ -23,3 +23,19 @@ Diese interaktive Visualisierung zeigt anschaulich:
 1. Repository klonen oder `ddos-visualisierung-full.html` herunterladen
 2. Die HTML-Datei in einem modernen Browser öffnen
 3. Keine weiteren Dependencies oder Installation nötig!
+
+### Interaktion
+1. **Angriffsart wählen**: Dropdown-Menü zum Auswählen der Traffic-Art
+2. **Protokoll wählen**: Dropdown für TCP, UDP oder Mixed
+3. **Schutz-Level einstellen**: Buttons zum Aktivieren verschiedener Schutzmaßnahmen
+4. **Animation steuern**: Pause/Play und Reset-Buttons
+5. **Beobachten**: Server-Health und Live-Stats mit Schwankungen in Echtzeit verfolgen
+
+**Beispiel-Szenarien zum Testen:**
+- **Botnet + UDP + Ohne Firewall**: Server geht sofort offline (200-250 Gbit/s!)
+- **Botnet + TCP + Voller Schutz**: 98% geblockt, Server bleibt online (120-150 Gbit/s abgewehrt)
+- **C2 + UDP + Mit Firewall**: 33% Schutz, Server unter Last (20-25 Gbit/s)
+- **C2 + TCP + Mit Firewall**: Mehr Pakete, unterschiedliche Last (50k-70k PPS)
+- **Booter + TCP vs UDP**: Unterschied in Paketrate und Bandbreite beobachten
+  - TCP: 5-7 Gbit/s mit 4k-6k PPS (blaue Pakete)
+  - UDP: 8-10 Gbit/s mit 3k-5k PPS (rote Pakete)
