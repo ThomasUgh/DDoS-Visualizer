@@ -1,1 +1,1296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDoS Angriff - Vollständige Visualisierung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .control-section {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .attack-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .attack-selector label {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .attack-selector select {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            min-width: 250px;
+        }
+
+        .attack-selector select option {
+            background: #764ba2;
+            color: #fff;
+        }
+
+        .protocol-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .protocol-selector label {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .protocol-selector select {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            min-width: 220px;
+        }
+
+        .protocol-selector select option {
+            background: #764ba2;
+            color: #fff;
+        }
+
+        .protection-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .protection-selector label {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .protection-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .protection-btn {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .protection-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .protection-btn.active {
+            background: rgba(255,255,255,0.4);
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        .visualization-area {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            min-height: 600px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .network-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            height: 450px;
+            padding: 20px;
+        }
+
+        /* Botnet Infrastructure */
+        .botnet-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .c2-server {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ff0000 0%, #8b0000 100%);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255,0,0,0.6);
+            animation: pulse-red 2s infinite;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(255,0,0,0.6);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(255,0,0,0.9);
+                transform: scale(1.05);
+            }
+        }
+
+        .c2-icon {
+            font-size: 2.5em;
+        }
+
+        .c2-label {
+            font-size: 0.7em;
+            font-weight: bold;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .command-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #ff0000, transparent);
+            width: 80px;
+            animation: command-pulse 1.5s infinite;
+        }
+
+        @keyframes command-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .bots-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bot {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            position: relative;
+            animation: bot-idle 3s infinite;
+        }
+
+        @keyframes bot-idle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .normal-client {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        /* Firewall + iptables Layer */
+        .firewall-layer {
+            position: absolute;
+            left: 280px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 160px;
+            height: 350px;
+            background: linear-gradient(135deg, rgba(255,165,0,0.3) 0%, rgba(255,140,0,0.3) 100%);
+            border: 3px solid rgba(255,165,0,0.9);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            z-index: 5;
+            box-shadow: 0 0 30px rgba(255,165,0,0.4);
+        }
+
+        .firewall-icon {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+        }
+
+        .firewall-label {
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .firewall-tech {
+            font-size: 0.75em;
+            text-align: center;
+            opacity: 0.9;
+            padding: 0 10px;
+        }
+
+        /* DDoS Protection Layer */
+        .ddos-protection-layer {
+            position: absolute;
+            left: 520px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 180px;
+            height: 350px;
+            background: linear-gradient(135deg, rgba(0,255,255,0.2) 0%, rgba(0,200,255,0.2) 100%);
+            border: 3px solid rgba(0,255,255,0.8);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            z-index: 4;
+            box-shadow: 0 0 30px rgba(0,255,255,0.4);
+        }
+
+        .ddos-icon {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+        }
+
+        .ddos-label {
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .ddos-tech {
+            font-size: 0.7em;
+            text-align: center;
+            opacity: 0.9;
+            padding: 0 10px;
+            line-height: 1.3;
+        }
+
+        /* Server */
+        .server {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .server-icon {
+            font-size: 3.5em;
+        }
+
+        .server-label {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #7fff00);
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .health-fill.warning {
+            background: linear-gradient(90deg, #ffaa00, #ff6600);
+        }
+
+        .health-fill.critical {
+            background: linear-gradient(90deg, #ff0000, #aa0000);
+            animation: critical-pulse 0.5s infinite;
+        }
+
+        @keyframes critical-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Packets/Requests */
+        .packet {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            animation: flyToServer 3s linear;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            z-index: 3;
+        }
+
+        @keyframes flyToServer {
+            from {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(900px) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .attack-packet {
+            background: #ff0000;
+            box-shadow: 0 0 15px rgba(255,0,0,0.9);
+        }
+
+        .tcp-packet {
+            background: #0066ff !important;
+            border: 2px solid #0044cc;
+            box-shadow: 0 0 15px rgba(0,102,255,0.9);
+        }
+
+        .udp-packet {
+            background: #ff0000 !important;
+            border: 2px solid #cc0000;
+            box-shadow: 0 0 15px rgba(255,0,0,0.9);
+        }
+
+        .blocked-packet {
+            animation: blocked 1.2s ease-out forwards;
+        }
+
+        @keyframes blocked {
+            0% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            40% {
+                transform: translateX(250px) scale(1.3);
+                opacity: 1;
+            }
+            60% {
+                transform: translateX(250px) scale(1.3) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateX(250px) scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .filtered-packet {
+            animation: filtered 1.5s ease-out forwards;
+        }
+
+        @keyframes filtered {
+            0% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(490px) scale(1.2);
+                opacity: 1;
+            }
+            70% {
+                transform: translateX(490px) scale(1.2) rotate(90deg);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateX(490px) scale(0) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* Stats Panel */
+        .stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 250px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .stat-label {
+            color: #aaa;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .stat-value.danger {
+            color: #ff4444;
+        }
+
+        .stat-value.warning {
+            color: #ffaa00;
+        }
+
+        .stat-value.success {
+            color: #00ff00;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .control-btn {
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        /* Info Boxes */
+        .info-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .info-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-box-icon {
+            font-size: 1.5em;
+        }
+
+        .info-box p {
+            line-height: 1.6;
+            opacity: 0.95;
+            font-size: 0.95em;
+        }
+
+        .info-box ul {
+            margin-top: 10px;
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .info-box ul li {
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ DDoS Angriff - Vollständige Visualisierung</h1>
+        <div class="subtitle">Vom Botnet bis zum geschützten Server: Wie moderne DDoS-Schutzarchitekturen funktionieren</div>
+        
+        <div class="control-section">
+            <div class="attack-selector">
+                <label for="attackType">🎯 Traffic / Angriffsart:</label>
+                <select id="attackType" onchange="updateScenario()">
+                    <option value="normal">✅ Normaler Traffic</option>
+                    <option value="booter">💀 Booter Angriff</option>
+                    <option value="c2">🎛️ C2 Netzwerk</option>
+                    <option value="botnet">🤖 Botnet</option>
+                </select>
+            </div>
+
+            <div class="protocol-selector">
+                <label for="protocolType">📡 Protokoll:</label>
+                <select id="protocolType" onchange="updateScenario()">
+                    <option value="mixed">🔀 Mixed (TCP + UDP)</option>
+                    <option value="tcp">🔵 TCP (+ Handshake)</option>
+                    <option value="udp">🔴 UDP (Flood)</option>
+                </select>
+            </div>
+            
+            <div class="protection-selector">
+                <label>🛡️ Schutz-Level:</label>
+                <div class="protection-buttons">
+                    <button class="protection-btn active" onclick="setProtection('none')">
+                        ❌ Ohne Firewall
+                    </button>
+                    <button class="protection-btn" onclick="setProtection('firewall')">
+                        🛡️ Mit Firewall
+                    </button>
+                    <button class="protection-btn" onclick="setProtection('full')">
+                        🔐 Voller Schutz
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization-area">
+            <div class="description" id="description">
+                Normaler Netzwerkverkehr: Legitime Clients senden Anfragen an den Server.
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Packets/Sek:</span>
+                    <span class="stat-value" id="packetsPerSec">5</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Bandbreite:</span>
+                    <span class="stat-value" id="bandwidth">0.1 Gbit/s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Firewall blockiert:</span>
+                    <span class="stat-value success" id="firewallBlocked">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">DDoS-Prot. gefiltert:</span>
+                    <span class="stat-value success" id="ddosFiltered">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Server Load:</span>
+                    <span class="stat-value" id="serverLoad">15%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value success" id="systemStatus">✓ Healthy</span>
+                </div>
+            </div>
+
+            <div class="network-container" id="networkContainer">
+                <!-- Left Side: Botnet Infrastructure -->
+                <div class="botnet-section" id="botnetSection">
+                    <!-- Will be populated dynamically -->
+                </div>
+
+                <!-- Middle: Protection Layers -->
+                <div id="firewallLayer"></div>
+                <div id="ddosLayer"></div>
+
+                <!-- Right Side: Server -->
+                <div class="server">
+                    <div class="server-icon">🖥️</div>
+                    <div class="server-label">Web Server</div>
+                    <div class="health-bar">
+                        <div class="health-fill" id="healthFill" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <button class="control-btn" onclick="toggleAnimation()">
+                    <span id="playPauseText">⏸️ Pause</span>
+                </button>
+                <button class="control-btn" onclick="resetAnimation()">
+                    🔄 Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Info Sections -->
+        <div class="info-section">
+            <div class="info-box">
+                <h3><span class="info-box-icon">💀</span>Booter/Stresser Services</h3>
+                <p><strong>DDoS-as-a-Service</strong> - Illegale Services, die DDoS-Angriffe für ~$20-40/Monat anbieten:</p>
+                <ul>
+                    <li><strong>SaaS-Modell:</strong> Abo-basiert mit "Stress Testing" als Tarnung</li>
+                    <li><strong>Keine Skills nötig:</strong> Jeder kann einen Angriff starten</li>
+                    <li><strong>Verschiedene Vektoren:</strong> Layer 4 (TCP/UDP Floods) und Layer 7 (HTTP Floods)</li>
+                    <li><strong>Amplification Attacks:</strong> DNS, NTP, SSDP Reflection für massive Verstärkung</li>
+                    <li><strong>PayPal/Crypto:</strong> Zahlung oft über normale Zahlungsmethoden</li>
+                    <li><strong>Typisch:</strong> 2-5 Gbit/s Traffic</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="info-box-icon">🎛️</span>C2 Server (Command & Control)</h3>
+                <p><strong>Das Gehirn der Operation</strong> - Steuert das gesamte Botnet:</p>
+                <ul>
+                    <li><strong>Zentrale Architektur:</strong> Ein Server kontrolliert alle Bots (leicht zu blocken)</li>
+                    <li><strong>P2P Architektur:</strong> Dezentralisiert, kein Single Point of Failure</li>
+                    <li><strong>Hybrid:</strong> Kombination aus beiden für Resilienz</li>
+                    <li><strong>Kommunikation:</strong> HTTP/HTTPS, DNS Tunneling, IRC, Social Media APIs</li>
+                    <li><strong>Befehle:</strong> Start/Stop Attack, Update Malware, Exfiltrate Data</li>
+                    <li><strong>Beaconing:</strong> Bots melden sich regelmäßig beim C2</li>
+                    <li><strong>Typisch:</strong> 10 Gbit/s Traffic durch koordinierte Bots</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="info-box-icon">🤖</span>Botnet</h3>
+                <p><strong>Armee von Zombies</strong> - Kompromittierte Geräte weltweit:</p>
+                <ul>
+                    <li><strong>Infektion:</strong> Malware via Phishing, Exploits, Drive-by Downloads</li>
+                    <li><strong>Zombies:</strong> Infizierte Geräte (PCs, IoT, Server) ohne Wissen des Besitzers</li>
+                    <li><strong>Größe:</strong> Von 1.000 bis über 1 Million Bots</li>
+                    <li><strong>IoT Botnets:</strong> Mirai nutzte Router, Kameras, DVRs für massive Angriffe</li>
+                    <li><strong>Koordination:</strong> Alle Bots greifen gleichzeitig ein Ziel an</li>
+                    <li><strong>Verwendung:</strong> DDoS, Spam, Crypto Mining, Data Theft</li>
+                    <li><strong>Typisch:</strong> 50+ Gbit/s Traffic - kann Server komplett offline nehmen!</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="info-box-icon">🛡️</span>Firewall + iptables (Layer 3/4)</h3>
+                <p><strong>Erste Verteidigungslinie</strong> - Network-Level Protection:</p>
+                <ul>
+                    <li><strong>SYN Flood Protection:</strong> SYN Cookies gegen Connection Floods</li>
+                    <li><strong>Rate Limiting:</strong> Max. Connections pro IP/Sekunde</li>
+                    <li><strong>IP Blacklisting:</strong> Bekannte Angreifer-IPs blocken</li>
+                    <li><strong>Geo-Blocking:</strong> Traffic aus bestimmten Ländern blockieren</li>
+                    <li><strong>Connection Tracking:</strong> Stateful Inspection für valide Connections</li>
+                    <li><strong>Effektivität:</strong> ~25% der Angriffe werden geblockt</li>
+                    <li><strong>Problem:</strong> Kann durch volumetrische Angriffe überwältigt werden</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="info-box-icon">🔐</span>DDoS Protection (Deep Inspection)</h3>
+                <p><strong>Spezialisierte Filterung</strong> - Wie OVHcloud's VAC System:</p>
+                <ul>
+                    <li><strong>Traffic Analysis:</strong> ML-basierte Erkennung von Angriffsmustern</li>
+                    <li><strong>Scrubbing Centers:</strong> Traffic wird durch Cleaning-Zentren geleitet</li>
+                    <li><strong>BGP Routing:</strong> Malicious Traffic wird umgeleitet</li>
+                    <li><strong>Behavioral Analysis:</strong> Erkennt Bot-Verhalten vs. echte User</li>
+                    <li><strong>Challenge-Response:</strong> JavaScript/CAPTCHA Tests für Layer 7</li>
+                    <li><strong>Kapazität:</strong> OVHcloud: 17 Tbit/s, kann Angriffe bis 1.3 Tbit/s abwehren</li>
+                    <li><strong>Effektivität:</strong> Kombiniert mit Firewall ~95% Schutz</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="info-box-icon">📊</span>Moderne DDoS Techniken</h3>
+                <p><strong>State-of-the-Art Schutz</strong> - Was professionelle Lösungen einsetzen:</p>
+                <ul>
+                    <li><strong>Multi-Layer Defense:</strong> L3/L4 (Network) + L7 (Application)</li>
+                    <li><strong>Always-On Monitoring:</strong> 24/7 Traffic-Analyse</li>
+                    <li><strong>Auto-Mitigation:</strong> Automatische Aktivierung bei Angriff</li>
+                    <li><strong>CDN Integration:</strong> Cloudflare, Akamai verteilen Last global</li>
+                    <li><strong>Anycast Network:</strong> Traffic wird zum nächsten Scrubbing Center geleitet</li>
+                    <li><strong>Zero-Day Protection:</strong> Schutz vor unbekannten Angriffsvektoren</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="info-box-icon">🌐</span>Bekannte DDoS Protection Anbieter</h3>
+                <p><strong>Top Enterprise-Lösungen</strong> - Professionelle Anbieter mit globaler Infrastruktur:</p>
+                <ul>
+                    <li><strong>Cloudflare:</strong> 
+                        • 310+ Tbit/s Kapazität global
+                        • Magic Transit für L3/L4
+                        • WAF für L7 Schutz
+                        • Anycast Netzwerk in 300+ Städten
+                        • Schnellste Mitigation (<3 Sekunden)
+                    </li>
+                    <li><strong>Akamai:</strong> 
+                        • 450+ Tbit/s Mitigation Capacity
+                        • Prolexic DDoS Scrubbing Centers
+                        • Intelligent Platform für Zero-Day
+                        • CDN + Security in einem
+                        • 4.100+ PoPs weltweit
+                    </li>
+                    <li><strong>AWS Shield:</strong> 
+                        • Shield Standard kostenlos inkludiert
+                        • Shield Advanced mit 24/7 DDoS Response Team
+                        • Schutz bis zu mehreren Tbit/s
+                        • Integration mit CloudFront & Route 53
+                        • Cost Protection gegen Traffic-Spikes
+                    </li>
+                    <li><strong>CDN77:</strong> 
+                        • 65+ Tbit/s Kapazität
+                        • Edge DDoS Protection
+                        • Sehr günstiges Preis-Leistungs-Verhältnis
+                        • 50+ Global PoPs
+                        • Real-time Traffic Analytics
+                    </li>
+                    <li><strong>OVHcloud:</strong> 
+                        • 17+ Tbit/s VAC (Anti-DDoS) System
+                        • Immer aktiv ohne Zusatzkosten
+                        • Schutz bis 1.3 Tbit/s getestet
+                        • Edge Network Firewall
+                        • Scrubbing Center in mehreren Regionen
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAttackType = 'normal';
+        let currentProtocol = 'mixed';
+        let currentProtection = 'none';
+        let animationRunning = true;
+        let packetInterval;
+        let statsInterval;
+        let serverHealth = 100;
+        let firewallBlocked = 0;
+        let ddosFiltered = 0;
+
+        const attackTypes = {
+            'normal': {
+                name: 'Normaler Traffic',
+                showC2: false,
+                showBots: false,
+                normalClients: 3,
+               
+                tcp: {
+                    packetsPerSecBase: 5,
+                    packetsPerSecRange: [80, 100],
+                    bandwidthBase: 0.1,
+                    bandwidthRange: [0.1, 0.2]
+                },
+                udp: {
+                    packetsPerSecBase: 3,
+                    packetsPerSecRange: [50, 80],
+                    bandwidthBase: 0.12,
+                    bandwidthRange: [0.12, 0.25]
+                },
+                mixed: {
+                    packetsPerSecBase: 5,
+                    packetsPerSecRange: [80, 100],
+                    bandwidthBase: 0.1,
+                    bandwidthRange: [0.1, 0.2]
+                },
+                attackIntensity: 0,
+                packetSpeed: 3000
+            },
+            'booter': {
+                name: 'Booter Angriff',
+                showC2: false,
+                showBots: true,
+                normalClients: 1,
+                tcp: {
+                    packetsPerSecBase: 50,
+                    packetsPerSecRange: [4000, 6000],
+                    bandwidthBase: 6,
+                    bandwidthRange: [5, 7]
+                },
+                udp: {
+                    packetsPerSecBase: 35,
+                    packetsPerSecRange: [3000, 5000],
+                    bandwidthBase: 9,
+                    bandwidthRange: [8, 10]
+                },
+                mixed: {
+                    packetsPerSecBase: 40,
+                    packetsPerSecRange: [4000, 5500],
+                    bandwidthBase: 7.5,
+                    bandwidthRange: [5, 10]
+                },
+                attackIntensity: 0.21,
+                packetSpeed: 2000
+            },
+            'c2': {
+                name: 'C2 Netzwerk',
+                showC2: true,
+                showBots: true,
+                normalClients: 1,
+                tcp: {
+                    packetsPerSecBase: 150,
+                    packetsPerSecRange: [50000, 70000],
+                    bandwidthBase: 17.5,
+                    bandwidthRange: [15, 20]
+                },
+                udp: {
+                    packetsPerSecBase: 100,
+                    packetsPerSecRange: [30000, 40000],
+                    bandwidthBase: 22.5,
+                    bandwidthRange: [20, 25]
+                },
+                mixed: {
+                    packetsPerSecBase: 120,
+                    packetsPerSecRange: [40000, 70000],
+                    bandwidthBase: 20,
+                    bandwidthRange: [15, 25]
+                },
+                attackIntensity: 0.55,
+                packetSpeed: 1530
+            },
+            'botnet': {
+                name: 'Botnet',
+                showC2: true,
+                showBots: true,
+                normalClients: 0,
+                tcp: {
+                    packetsPerSecBase: 400,
+                    packetsPerSecRange: [1500000, 2500000],
+                    bandwidthBase: 135,
+                    bandwidthRange: [120, 150]
+                },
+                udp: {
+                    packetsPerSecBase: 250,
+                    packetsPerSecRange: [1000000, 2000000],
+                    bandwidthBase: 225,
+                    bandwidthRange: [200, 250]
+                },
+                mixed: {
+                    packetsPerSecBase: 300,
+                    packetsPerSecRange: [1500000, 2500000],
+                    bandwidthBase: 180,
+                    bandwidthRange: [120, 250]
+                },
+                attackIntensity: 1.02,
+                packetSpeed: 750
+            }
+        };
+
+        const protectionLevels = {
+            'none': {
+                name: 'Ohne Firewall',
+                showFirewall: false,
+                showDDoSProtection: false,
+                firewallBlockRate: 0,
+                ddosBlockRate: 0,
+                damageMultiplier: 1.0
+            },
+            'firewall': {
+                name: 'Mit Firewall',
+                showFirewall: true,
+                showDDoSProtection: false,
+                firewallBlockRate: 0.33,
+                ddosBlockRate: 0,
+                damageMultiplier: 0.67
+            },
+            'full': {
+                name: 'Voller Schutz',
+                showFirewall: true,
+                showDDoSProtection: true,
+                firewallBlockRate: 0.33,
+                ddosBlockRate: 0.98,
+                damageMultiplier: 0.02
+            }
+        };
+
+        function updateScenario() {
+            currentAttackType = document.getElementById('attackType').value;
+            currentProtocol = document.getElementById('protocolType').value;
+            serverHealth = 100;
+            firewallBlocked = 0;
+            ddosFiltered = 0;
+            updateVisualization();
+            if (animationRunning) {
+                startAnimation();
+                startLiveStats();
+            }
+        }
+
+        function setProtection(level) {
+            currentProtection = level;
+            serverHealth = 100;
+            firewallBlocked = 0;
+            ddosFiltered = 0;
+            
+           
+            document.querySelectorAll('.protection-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateVisualization();
+            if (animationRunning) {
+                startAnimation();
+            }
+        }
+
+        function getDescription() {
+            const attack = attackTypes[currentAttackType];
+            const protection = protectionLevels[currentProtection];
+            const protocol = currentProtocol === 'tcp' ? 'TCP' : currentProtocol === 'udp' ? 'UDP' : 'Mixed';
+            
+            if (currentAttackType === 'normal') {
+                return `✅ Normaler Betrieb (${protocol}): Legitime Clients senden Anfragen. Keine Bedrohung.`;
+            }
+            
+            let desc = '';
+            if (currentAttackType === 'booter') {
+                desc = `💀 BOOTER ANGRIFF (${protocol}): Script-Kiddie nutzt DDoS-as-a-Service.`;
+            } else if (currentAttackType === 'c2') {
+                desc = `🎛️ C2 NETZWERK ANGRIFF (${protocol}): Professioneller koordinierter Angriff!`;
+            } else if (currentAttackType === 'botnet') {
+                desc = `🤖 MASSIVE BOTNET ATTACKE (${protocol}): Über 100.000 Zombies!!`;
+            }
+            
+            if (currentProtection === 'none') {
+                desc += ' | ❌ KEIN SCHUTZ - Server wird überlastet!';
+            } else if (currentProtection === 'firewall') {
+                desc += ' | 🛡️ Firewall aktiv - Server stark belastet!';
+            } else if (currentProtection === 'full') {
+                desc += ' | 🔐 Voller Schutz aktiv - Server bleibt online!';
+            }
+            
+            return desc;
+        }
+
+        function startLiveStats() {
+            if (statsInterval) {
+                clearInterval(statsInterval);
+            }
+
+            statsInterval = setInterval(() => {
+                const attack = attackTypes[currentAttackType];
+                const proto = attack[currentProtocol];
+                
+               
+                const ppsRange = proto.packetsPerSecRange;
+                const bwRange = proto.bandwidthRange;
+                
+                const pps = Math.floor(Math.random() * (ppsRange[1] - ppsRange[0]) + ppsRange[0]);
+                const bw = (Math.random() * (bwRange[1] - bwRange[0]) + bwRange[0]).toFixed(2);
+                
+               
+                let ppsFormatted;
+                if (pps >= 1000000) {
+                    ppsFormatted = (pps / 1000000).toFixed(2) + 'M';
+                } else if (pps >= 1000) {
+                    ppsFormatted = (pps / 1000).toFixed(1) + 'k';
+                } else {
+                    ppsFormatted = pps;
+                }
+                
+                document.getElementById('packetsPerSec').textContent = ppsFormatted;
+                document.getElementById('bandwidth').textContent = bw + ' Gbit/s';
+            }, 500);
+        }
+
+        function updateVisualization() {
+            const attack = attackTypes[currentAttackType];
+            const protection = protectionLevels[currentProtection];
+            
+           
+            document.getElementById('description').textContent = getDescription();
+            
+           
+            const botnetSection = document.getElementById('botnetSection');
+            botnetSection.innerHTML = '';
+            
+            if (attack.showC2) {
+                const c2 = document.createElement('div');
+                c2.className = 'c2-server';
+                c2.innerHTML = `
+                    <div class="c2-icon">🎛️</div>
+                    <div class="c2-label">C2 Server</div>
+                `;
+                botnetSection.appendChild(c2);
+            }
+            
+            const botsArea = document.createElement('div');
+            botsArea.className = 'bots-area';
+            
+            if (attack.showBots) {
+                for (let i = 0; i < 5; i++) {
+                    const bot = document.createElement('div');
+                    bot.className = 'bot';
+                    bot.innerHTML = '🤖';
+                    bot.style.animationDelay = `${i * 0.3}s`;
+                    botsArea.appendChild(bot);
+                }
+            }
+            
+            for (let i = 0; i < attack.normalClients; i++) {
+                const client = document.createElement('div');
+                client.className = 'bot normal-client';
+                client.innerHTML = '👤';
+                botsArea.appendChild(client);
+            }
+            
+            botnetSection.appendChild(botsArea);
+            
+           
+            const firewallLayer = document.getElementById('firewallLayer');
+            if (protection.showFirewall) {
+                firewallLayer.innerHTML = `
+                    <div class="firewall-icon">🛡️</div>
+                    <div class="firewall-label">Firewall</div>
+                    <div class="firewall-tech">+ iptables<br>SYN Cookies<br>Rate Limiting</div>
+                `;
+                firewallLayer.className = 'firewall-layer';
+            } else {
+                firewallLayer.innerHTML = '';
+                firewallLayer.className = '';
+            }
+            
+           
+            const ddosLayer = document.getElementById('ddosLayer');
+            if (protection.showDDoSProtection) {
+                ddosLayer.innerHTML = `
+                    <div class="ddos-icon">🔐</div>
+                    <div class="ddos-label">DDoS Protection</div>
+                    <div class="ddos-tech">Traffic Analysis<br>ML Detection<br>Scrubbing Center</div>
+                `;
+                ddosLayer.className = 'ddos-protection-layer';
+            } else {
+                ddosLayer.innerHTML = '';
+                ddosLayer.className = '';
+            }
+            
+           
+            const proto = attack[currentProtocol];
+            document.getElementById('packetsPerSec').textContent = proto.packetsPerSecBase;
+            document.getElementById('bandwidth').textContent = proto.bandwidthBase + ' Gbit/s';
+            updateServerHealth();
+        }
+
+        function startAnimation() {
+            if (packetInterval) {
+                clearInterval(packetInterval);
+            }
+            
+            const attack = attackTypes[currentAttackType];
+            const proto = attack[currentProtocol];
+            const baseInterval = 1000 / (proto.packetsPerSecBase / 15);
+            
+            packetInterval = setInterval(() => {
+                if (!animationRunning) return;
+                
+                const botsArea = document.querySelector('.bots-area');
+                if (!botsArea) return;
+                
+                const sources = botsArea.querySelectorAll('.bot');
+                if (sources.length === 0) return;
+                
+                const randomSource = sources[Math.floor(Math.random() * sources.length)];
+                sendPacket(randomSource);
+                
+               
+                const protection = protectionLevels[currentProtection];
+                const healthChange = attack.attackIntensity * 0.4 * protection.damageMultiplier;
+                
+                if (attack.attackIntensity > 0) {
+                    serverHealth = Math.max(0, serverHealth - healthChange);
+                } else {
+                    serverHealth = Math.min(100, serverHealth + 0.1);
+                }
+                
+                updateServerHealth();
+            }, baseInterval);
+        }
+
+        function sendPacket(source) {
+            const attack = attackTypes[currentAttackType];
+            const protection = protectionLevels[currentProtection];
+            
+            const packet = document.createElement('div');
+            const isAttacker = source.innerHTML === '🤖';
+            
+           
+            let packetProtocol = currentProtocol;
+            if (currentProtocol === 'mixed') {
+                packetProtocol = Math.random() > 0.5 ? 'tcp' : 'udp';
+            }
+            
+            let packetClass = 'packet';
+            if (isAttacker) {
+                packetClass += ' attack-packet';
+                if (packetProtocol === 'tcp') {
+                    packetClass += ' tcp-packet';
+                } else if (packetProtocol === 'udp') {
+                    packetClass += ' udp-packet';
+                }
+            }
+            
+            packet.className = packetClass;
+            
+            const sourceRect = source.getBoundingClientRect();
+            const containerRect = document.getElementById('networkContainer').getBoundingClientRect();
+            
+            packet.style.left = (sourceRect.left - containerRect.left + 25) + 'px';
+            packet.style.top = (sourceRect.top - containerRect.top + 25) + 'px';
+            
+           
+            const animSpeed = attack.packetSpeed || 3000;
+            packet.style.animationDuration = animSpeed + 'ms';
+            
+           
+            let blocked = false;
+            if (isAttacker) {
+                if (protection.showFirewall && Math.random() < protection.firewallBlockRate) {
+                    packet.className = packetClass + ' blocked-packet';
+                    firewallBlocked++;
+                    document.getElementById('firewallBlocked').textContent = firewallBlocked;
+                    blocked = true;
+                } else if (protection.showDDoSProtection && Math.random() < protection.ddosBlockRate) {
+                    packet.className = packetClass + ' filtered-packet';
+                    ddosFiltered++;
+                    document.getElementById('ddosFiltered').textContent = ddosFiltered;
+                    blocked = true;
+                }
+            }
+            
+            document.getElementById('networkContainer').appendChild(packet);
+            
+            setTimeout(() => {
+                if (packet.parentNode) {
+                    packet.parentNode.removeChild(packet);
+                }
+            }, blocked ? 1500 : animSpeed);
+        }
+
+        function updateServerHealth() {
+            const healthFill = document.getElementById('healthFill');
+            healthFill.style.width = serverHealth + '%';
+            
+            healthFill.classList.remove('warning', 'critical');
+            let status = '✓ Healthy';
+            let statusClass = 'success';
+            
+            if (serverHealth <= 0) {
+                status = '🔴 OFFLINE';
+                statusClass = 'danger';
+                healthFill.classList.add('critical');
+            } else if (serverHealth < 15) {
+                healthFill.classList.add('critical');
+                status = '⚠️ Nicht erreichbar';
+                statusClass = 'danger';
+            } else if (serverHealth < 50) {
+                healthFill.classList.add('warning');
+                status = '⚠️ Under Load';
+                statusClass = 'warning';
+            }
+            
+            const load = Math.round(100 - serverHealth);
+            document.getElementById('serverLoad').textContent = load + '%';
+            document.getElementById('systemStatus').textContent = status;
+            document.getElementById('systemStatus').className = 'stat-value ' + statusClass;
+        }
+
+        function toggleAnimation() {
+            animationRunning = !animationRunning;
+            const playPauseText = document.getElementById('playPauseText');
+            
+            if (animationRunning) {
+                playPauseText.textContent = '⏸️ Pause';
+                startAnimation();
+                startLiveStats();
+            } else {
+                playPauseText.textContent = '▶️ Play';
+                if (packetInterval) {
+                    clearInterval(packetInterval);
+                }
+                if (statsInterval) {
+                    clearInterval(statsInterval);
+                }
+            }
+        }
+
+        function resetAnimation() {
+            serverHealth = 100;
+            firewallBlocked = 0;
+            ddosFiltered = 0;
+            document.getElementById('firewallBlocked').textContent = '0';
+            document.getElementById('ddosFiltered').textContent = '0';
+            updateServerHealth();
+            
+           
+            const packets = document.querySelectorAll('.packet, .blocked-packet, .attack-packet, .filtered-packet');
+            packets.forEach(pkt => pkt.remove());
+        }
+
+       
+        updateVisualization();
+        startAnimation();
+        startLiveStats();
+    </script>
+</body>
+</html>
